@@ -1,0 +1,6 @@
+# dsh-drop-to-path-electron — bundle patch (web profile).
+# The plugin is a pure web CLIENT plugin; it needs only a no-op host half.
+
+- insert:
+    - id: dsh-drop-to-path-electron
+      name: '@dsh-community/dsh-drop-to-path-electron'
