@@ -15,17 +15,16 @@
 - **桌面版（Electron）**：Electron 本身能拿到真实路径，但沙箱默认不把 webUtils/file.path 暴露给页面。
 - **解法**：宿主（EAC）在 **preload 暴露一个桥**，插件即可 drop 瞬间拿到真实路径。
 
-## 实测证据（Electron 43）
+## 写入行为
 
-用 preload 桥 `window.dshNative.getPathForFile` 实测：
-- `window.webUtils` → 不可用
-- `file.path` → 不可用
-- **preload 桥** → 真实绝对路径，单文件/多文件一次拖都稳定
+- 路径是**追加**进输入框的（先读当前草稿再拼接），不会清掉你正在打的内容。
+- 走的是官方 `conversation.input` 读改写通道（与 dsh-better-sidebar 同款）；宿主没有该服务时才退回 textarea 兜底。
+- 桥返回的路径会做绝对路径校验，假值（如 `?`）会被丢弃。
 
 ## 结构
 
 - `lib/index.js` — no-op host（官方插件要求合法 bundle）
-- `lib/client.js` — 浏览器半区：ModuleLoader 加载 + composer.dock 槽位写输入框
+- `lib/client.js` — 浏览器半区：ModuleLoader 加载 + composer.dock 槽位追踪会话 + 追加路径
 - `package.json` — dsh.client 声明 + dsh.bundle.patch
 
 ## 安装（需宿主已暴露桥）
@@ -39,3 +38,7 @@
 
 - 仅当宿主是 Electron/桌面版且暴露了路径桥时才生效；普通浏览器拿不到真实路径。
 - 概念验证 Demo，非生产、未在桌面端完整实测。
+
+## License
+
+MIT
